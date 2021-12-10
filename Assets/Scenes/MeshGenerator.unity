@@ -331,7 +331,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   container: {fileID: 249321277}
-  material: {fileID: 2100000, guid: 2e2216ccf8edcb24b89f32d3be171877, type: 2}
+  material: {fileID: 2100000, guid: 9c600265e26ef3a40b220f4a39345410, type: 2}
 --- !u!1 &176362742
 GameObject:
   m_ObjectHideFlags: 0
