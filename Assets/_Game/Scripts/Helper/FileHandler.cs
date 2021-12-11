@@ -5,40 +5,75 @@ using System.IO;
 using System;
 using System.Linq;
 
-
-public static class FileHandler 
+public static class FileHandler
 {
-    public static void ReadDataset(Action<bool, DataSet> callback)
-    {
-        DataSet dataSet = new DataSet(Vector3.zero, Vector3.zero, Vector3.zero);
-        string path = GetPath();
 
+
+    public static void SaveToJson<T>(List<T> toSave, string fileName, Action<float, bool> callback)
+    {
+        string content = JsonHelper.ToJson<T>(toSave.ToArray());
+        //Debug.Log("Path " + GetPath(fileName));
+        WriteFile(GetPath(fileName), content, callback);
+    }
+    public static List<T> ReadFromJson<T>(string fileName)
+    {
+        string content = ReadFile(GetPath(fileName));
+        if (string.IsNullOrEmpty(content) || content == "{}")
+        {
+            return new List<T>();
+        }
+        List<T> res = JsonHelper.FromJson<T>(content).ToList();
+        return res;
+
+    }
+    private static string GetPath(string fileName)
+    {
+        return Application.streamingAssetsPath + "/" + fileName;
+        // return Application.persistentDataPath+"/"+fileName;
+    }
+    private static void WriteFile(string path, string content, Action<float, bool> callback)
+    {
+        FileStream fileStream = new FileStream(path, FileMode.Create);
+        using (StreamWriter writer = new StreamWriter(fileStream))
+        {
+            writer.Write(content);
+            callback(100, true);
+        }
+
+    }
+    private static string ReadFile(string path)
+    {
         if (File.Exists(path))
         {
-            string fileContents = File.ReadAllText(path);
-            dataSet = JsonUtility.FromJson<DataSet>(fileContents);
-            // Debug.Log($"Read Successfull {dataset.ToString()}");
-            callback(true, dataSet);
+            using (StreamReader reader = new StreamReader(path))
+            {
+                string content = reader.ReadToEnd();
+                return content;
+            }
         }
-        else
-        {
-            Debug.Log("Empty");
-            callback(false, dataSet);
-        }
-
+        else return "";
     }
-    public static void WriteDataset(DataSet dataset)
+
+}
+// covert objects list to array
+public static class JsonHelper
+{
+    public static T[] FromJson<T>(string json)
     {
-        string jsonDataset = JsonUtility.ToJson(dataset);
-        File.WriteAllText(GetPath(), jsonDataset);
-       // Debug.Log($"Write Successfull ");
-
+        Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
+        return wrapper.Items;
     }
 
-    private static string GetPath()
+    public static string ToJson<T>(T[] array)
     {
-        return Application.streamingAssetsPath + "/dataset.json";
-        // return Application.persistentDataPath + "/dataset.json";
+        Wrapper<T> wrapper = new Wrapper<T>();
+        wrapper.Items = array;
+        return JsonUtility.ToJson(wrapper);
     }
 
+    [Serializable]
+    private class Wrapper<T>
+    {
+        public T[] Items;
+    }
 }

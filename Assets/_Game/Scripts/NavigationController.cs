@@ -14,6 +14,10 @@ public class NavigationController : MonoBehaviour
     public float sensitivity = 10f;
     public float maxYAngle = 80f;
     private Vector2 currentRotation;
+    void Awake()
+    {
+        Restore();
+    }
     void Update()
     {
         // click and hold mouse left button to pan, mouse middle wheel to zoomin/zoomout & right button to rotate
@@ -51,7 +55,7 @@ public class NavigationController : MonoBehaviour
         Camera.main.transform.localPosition = new Vector3(0, 1f, -10f);
        
         cameraParen.transform.position = Vector3.zero;
-        cameraParen.transform.rotation = Quaternion.Euler(Vector3.zero) ;
+        cameraParen.transform.rotation = Quaternion.Euler(45f,0,0) ;
 
         Camera.main.orthographicSize = 5;
        

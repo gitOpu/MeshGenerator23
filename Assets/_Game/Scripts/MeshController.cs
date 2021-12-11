@@ -6,33 +6,45 @@ using System;
 
 
 
-public class MeshController : MeshGenerator
+public class MeshController : MeshGeneratorForScatter
 {
     public Transform container;
     public Material material;
-    private string url = "https://cysolutions.ca/temp/dataset.json";
+    private string fileName = "dataset.json";
+    private string defaultfileName = "default.json";
 
+   // public List<DataSet> ListOfDataSet = new List<DataSet>();
 
-
-     public void GenerateMesh(DataSet dataSet, bool isSaveToLocal)
+    void Awake()
     {
-        // if (!IsTriangle(dataSet)) { return; }
-       // IsTriangle(dataSet);
-        foreach (Transform item in container)
-        {
-            Destroy(item.gameObject);
-        }
-        GameObject go = Generate(dataSet, material);
-        if (go)
-        {
-            go.transform.parent = container;
-            go.transform.localPosition = Vector3.zero;
-           
-            // store data in local
-           if(isSaveToLocal) FileHandler.WriteDataset(dataSet);
-        }
-       
+        List<DataSet> ListOfDataSet = FileHandler.ReadFromJson<DataSet>(fileName);
+        GenerateMesh(ListOfDataSet);
     }
+    public void GenerateMesh(List<DataSet> ListOfDS)
+    {
+        foreach (Transform mesh in container)
+        {
+            Destroy(mesh.gameObject);
+        }
+
+        foreach (DataSet item in ListOfDS)
+        {
+            GameObject go = DynamicMeshGenerator(item.list.ToArray(), material);
+            if (go)
+            {
+                go.transform.parent = container;
+             
+            }
+        }
+    }
+
+    public void Restore()
+    {
+        List<DataSet> ListOfDataSet = FileHandler.ReadFromJson<DataSet>(defaultfileName);
+        GenerateMesh(ListOfDataSet);
+    }
+
+    /*
     public void LoadOnlineData(Action<bool> callback)
     {
         StartCoroutine(GetWebRequest.GetRequest(url, (isSuccess, onlineData)=> {
@@ -66,15 +78,7 @@ public class MeshController : MeshGenerator
         });
     }
 
-    public void Restore( )
-    {
-        Vector3 point1 = new Vector3(0,0,0);
-        Vector3 point2 = new Vector3(0,3,0);
-        Vector3 point3 = new Vector3(3,0,0);
-        
-        DataSet defaultDataSet = new DataSet(point1, point2, point3);
-        GenerateMesh(defaultDataSet, false);
-    }
+    
 
-   
+   */
 }
