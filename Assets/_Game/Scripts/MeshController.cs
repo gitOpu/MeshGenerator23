@@ -6,22 +6,31 @@ using System;
 
 
 
-public class MeshController : MeshGeneratorForScatter
+public class MeshController : MonoBehaviour
 {
+    public GameObject meshTemplate;
     public Transform container;
-    public Material material;
+    
+    public List<Material> materials;
     private string fileName = "dataset.json";
     private string defaultfileName = "default.json";
+    
+    public List<DataSet> userListOfDataSet = new List<DataSet>();
+    public string jsonData = "";
 
-   // public List<DataSet> ListOfDataSet = new List<DataSet>();
 
     void Awake()
     {
-        List<DataSet> ListOfDataSet = FileHandler.ReadFromJson<DataSet>(fileName);
-        GenerateMesh(ListOfDataSet);
+        GenerateMesh(userListOfDataSet);
+
+      
     }
     public void GenerateMesh(List<DataSet> ListOfDS)
     {
+
+        
+
+
         foreach (Transform mesh in container)
         {
             Destroy(mesh.gameObject);
@@ -29,56 +38,50 @@ public class MeshController : MeshGeneratorForScatter
 
         foreach (DataSet item in ListOfDS)
         {
-            GameObject go = DynamicMeshGenerator(item.list.ToArray(), material);
-            if (go)
+            if(item.list.Count > 0)
             {
+                GameObject go = Instantiate(meshTemplate);
+                MeshGeneratorForScatter meshGeneratorForScatter = go.GetComponent<MeshGeneratorForScatter>();
+                meshGeneratorForScatter.DynamicMeshGenerator(item.list.ToArray(), materials[UnityEngine.Random.Range(0, materials.Count)]);
                 go.transform.parent = container;
-             
+               
             }
+            else
+            {
+                Debug.LogError("Index is zero");
+            }
+            
         }
     }
 
     public void Restore()
     {
-        List<DataSet> ListOfDataSet = FileHandler.ReadFromJson<DataSet>(defaultfileName);
-        GenerateMesh(ListOfDataSet);
+       // List<DataSet> ListOfDataSet = FileHandler.ReadFromJson<DataSet>(defaultfileName);
+        GenerateMesh(userListOfDataSet);
+       
     }
 
-    /*
-    public void LoadOnlineData(Action<bool> callback)
+    private void OnDrawGizmos()
     {
-        StartCoroutine(GetWebRequest.GetRequest(url, (isSuccess, onlineData)=> {
+        if (userListOfDataSet == null) return;
+        foreach(DataSet ds in userListOfDataSet)
+        for (int i = 0; i < ds.list.Count; i++)
+        {
+            Gizmos.DrawSphere(ds.list[i], 0.15f);
 
-            if (isSuccess)
-            {
-                GenerateMesh(onlineData, true);
-                callback(true);
-            }
-            else
-            {
-                callback(false);
-            }
-        
-        }));
-    }
-    public void LoadLocalData(Action<bool> callback)
-    {
-        FileHandler.ReadDataset((isSuccess, localData) => {
+        }
 
-            if (isSuccess)
-            {
-                GenerateMesh(localData, false);
-                callback(true);
-            }
-            else
-            {
-                callback(false);
-            }
-
-        });
     }
 
-    
-
-   */
+   
 }
+
+
+ /* foreach (DataSet ds in userListOfDataSet)
+     for (int i = 0; i < ds.list.Count; i++)
+     {
+         jsonData += "{\"x\":" + ds.list[i].x +
+             ",\"y\":" + ds.list[i].y +
+             ",\"z\":" + ds.list[i].z + "},"
+            ;
+     }*/

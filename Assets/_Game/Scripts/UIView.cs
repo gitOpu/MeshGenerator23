@@ -12,10 +12,11 @@ public class UIView : MonoBehaviour
     public TMP_InputField dataSetText;
     public Animator warningAnimator;
 
-    
+
 
     private string fileName = "dataset.json";
     
+
 
     public List<DataSet> ListOfDataSet = new List<DataSet>();
     public DataSet[] arrayOfDatasets;
@@ -30,16 +31,19 @@ public class UIView : MonoBehaviour
         {
             arrayOfDatasets = JsonHelper.FromJson<DataSet>(dataSetText.text);
             ListOfDataSet.AddRange(arrayOfDatasets);
+            Controller.self.meshController.GenerateMesh(ListOfDataSet);
 
-            FileHandler.SaveToJson<DataSet>(ListOfDataSet, fileName, (response, isSuccess) =>
-            {
-                if (isSuccess)
-                {
-                    Debug.Log($"Data save successfully");
-                    Controller.self.meshController.GenerateMesh(ListOfDataSet);
-                }
-                else warningAnimator.SetTrigger("on_warning");
-            });
+            //FileHandler.SaveToJson<DataSet>(ListOfDS, defaultfileName, (response, isSuccess) => { });
+            //FileHandler.SaveToJson<DataSet>(ListOfDataSet, fileName, (response, isSuccess) =>
+            //{
+            //    if (isSuccess)
+            //    {
+            //        Debug.Log($"Data save successfully");
+                   
+
+            //    }
+            //    else warningAnimator.SetTrigger("on_warning");
+            //});
         }
         catch
         {
